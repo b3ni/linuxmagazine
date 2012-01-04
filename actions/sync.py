@@ -4,4 +4,4 @@ from action import Action
 
 class Sync(Action):
     def do(self):
-        self.config.URL
+        print self.config.URL
