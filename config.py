@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # url donde se alojan los artículos
 URL='http://www.linux-magazine.es/Magazine/Archive'
 
