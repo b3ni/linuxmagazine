@@ -5,22 +5,16 @@ Se podrán sincronizar todos los artículos para los clientes con suscripción d
 
 ## Requeriments
 
-$ sudo apt-get install git
-$ sudo apt-get install python-setuptools python-virtualenv python-pip
+	$ sudo apt-get install git
+	$ sudo apt-get install python-setuptools python-virtualenv python-pip
 
 ## Installation
 
-$ virtualenv --no-site-packages --distribute linuxmagazine
-$ cd linuxmagazine
-$ . bin/activate
-$ git clone git@github.com:b3ni/linuxmagazine.git src
-$ cd src
-
-virtualenv linuxmagazine
-cd linuxmagazine
-source bin/activate
-git clone git@github.com:b3ni/linuxmagazine.git
-pip install -E . -r src/requeriments.txt
+	$ virtualenv --no-site-packages --distribute linuxmagazine
+	$ cd linuxmagazine
+	$ . bin/activate
+	$ git clone git@github.com:b3ni/linuxmagazine.git src
+	$ pip install -E . -r src/requeriments.txt
 
 ## Usage
 
@@ -28,18 +22,18 @@ Dentro de: linuxmagazine/src
 
 Para sincronizar la copia local con los archivos de la web:
 
-$ python linuxmagazine.py sync
+	$ python linuxmagazine.py sync
 
 ## Configuration
 
 Editar el fichero linuxmagazine/src/config.py
 
-DIR_STORE = 'store'
+	DIR_STORE = 'store'
 
 Indica en directorio guardar los archivos descargados
 
-USER = ''
-PASS = ''
+	USER = ''
+	PASS = ''
 
 Usuario y password para la suscripción digital
 
