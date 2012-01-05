@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from base_action import BaseAction
+import log
 
 class Search(BaseAction):
-    pass
+    def do(self):
+        log.error("TODO")
