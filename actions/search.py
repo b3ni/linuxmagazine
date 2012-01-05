@@ -4,5 +4,5 @@ from base_action import BaseAction
 import log
 
 class Search(BaseAction):
-    def do(self):
+    def do(self, number=None):
         log.error("TODO")

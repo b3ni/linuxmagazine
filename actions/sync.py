@@ -26,50 +26,59 @@ class Sync(BaseAction):
             os.mkdir(self.config.DIR_STORE)
         except:
             pass
-    
-    def do(self):
-        # descargamos indice
-        log.info(u"Descargando indice: '%s'" % str(self.config.URL))
-                
-        with requests.session(auth=self.auth) as c:
-            r = c.get(self.config.URL + '/Magazine/Archive')
-            r.raise_for_status()
         
+        # session request
+        self.s = requests.session(auth=self.auth)
+    
+    def do(self, number=None):
+        if number is not None:
+            # descargamos un numero concreto
+            self._sync_number(number)
+        else:
+            # descargamos indice
+            log.info(u"Descargando indice: '%s'" % str(self.config.URL))
+            
+            r = self.s.get(self.config.URL + '/Magazine/Archive')
+            r.raise_for_status()
+            
             # recorremos los números
             for (numero, title, href) in self._iter_numeros(r.content):
-                url_numero = self.url_numero + href                
-                log.info(u"Descargando numero [%s] '%s'" % (str(numero), str(url_numero)))
-                
-                # creamos directorio dentro de store
-                directorio_numero = os.path.join(self.config.DIR_STORE, "%03d" % int(numero))
-                try:
-                    os.mkdir(directorio_numero)
-                except Exception:
-                    pass
-                
-                # leemos page
-                r = c.get(url_numero)
-                r.raise_for_status()
-                
-                for index, (title, pdfhref, pdfname, pdfsize, descripcion) in enumerate(self._iter_seccion(r.content)):
-                    # fichero destino
-                    path_file = os.path.join(directorio_numero, "%02d_%s_%s.pdf" % (index + 1, title, pdfhref))
-                    
-                    # comprobamos si existe
-                    if os.path.exists(path_file):
-                        continue
-                                        
-                    # descargamos                    
-                    urlpdf = url_numero + '/' + pdfhref
-                    log.info(u"Descargando PDF: '%s'" % str(urlpdf))
-                    
-                    r = c.get(urlpdf)
-                    r.raise_for_status()
-                    
-                    # salvamos pdf
-                    f = open(path_file, 'wb')
-                    f.write(r.content)
-                    f.close()
+                self._sync_number(int(numero))
+                        
+    def _sync_number(self, number):        
+        url_numero = self.url_numero + '/issue/%02d' % number        
+        log.info(u"Descargando numero [%s] '%s'" % (str(number), str(url_numero)))
+        
+        # creamos directorio dentro de store
+        directorio_numero = os.path.join(self.config.DIR_STORE, "%03d" % number)
+        try:
+            os.mkdir(directorio_numero)
+        except Exception:
+            pass
+        
+        # leemos page
+        r = self.s.get(url_numero)
+        r.raise_for_status()
+        
+        for index, (title, pdfhref, pdfname, pdfsize, descripcion) in enumerate(self._iter_seccion(r.content)):
+            # fichero destino
+            path_file = os.path.join(directorio_numero, "%02d_%s_%s.pdf" % (index + 1, title, pdfhref))
+            
+            # comprobamos si existe
+            if os.path.exists(path_file):
+                continue
+                                
+            # descargamos                    
+            urlpdf = url_numero + '/' + pdfhref
+            log.info(u"Descargando PDF: '%s'" % str(urlpdf))
+            
+            r = self.s.get(urlpdf)
+            r.raise_for_status()
+            
+            # salvamos pdf
+            f = open(path_file, 'wb')
+            f.write(r.content)
+            f.close()
             
     def _iter_numeros(self, content):
         """
@@ -98,16 +107,22 @@ class Sync(BaseAction):
         
         for ul in uls:
             b = ul.contents[0]
-            if b.name == 'b':
-                title = b.string.strip().replace(':', '')
+            
+            if b.name != 'b':
+                continue
+            
+            title = b.string.strip().replace(':', '')
                 
-                a = ul.contents[2]
-                pdfhref = a['href']
-                pdf = a.string.split('[')                
-                pdfname = pdf[0].strip().replace(':', '')
-                pdfsize = pdf[1].split(',')[1].strip().replace(']', '')
-                                                
-                descripcion = '\n'.join([t.string.strip() for t in ul.contents[3:]])
-                
-                yield (title, pdfhref, pdfname, pdfsize, descripcion)
+            a = ul.contents[2]
+            if a.name != 'a':
+                continue
+            
+            pdfhref = a['href']
+            pdf = a.string.split('[')                
+            pdfname = pdf[0].strip().replace(':', '')
+            pdfsize = pdf[1].split(',')[1].strip().replace(']', '')
+                                            
+            descripcion = '\n'.join([t.string.strip() for t in ul.contents[3:]])
+            
+            yield (title, pdfhref, pdfname, pdfsize, descripcion)
         
