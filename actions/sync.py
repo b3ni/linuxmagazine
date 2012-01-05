@@ -17,10 +17,12 @@ class Sync(BaseAction):
             self.auth = (self.config.USER, self.config.PASS)
             
         # si tenemos autenticacion modificamos el path base de revistas
-        self.url_numero = self.config.URL
+        self.url_numero_digital = self.config.URL + '/digital/issue'
+        self.url_numero_libre = self.config.URL + '/issue'
+        self.url_numero = self.url_numero_libre
         if self.auth is not None:
-            self.url_numero += '/digital'
-            
+            self.url_numero = self.url_numero_digital
+                        
         # creamos directorio base si no existe
         try:
             os.mkdir(self.config.DIR_STORE)
@@ -46,7 +48,7 @@ class Sync(BaseAction):
                 self._sync_number(int(numero))
                         
     def _sync_number(self, number):        
-        url_numero = self.url_numero + '/issue/%02d' % number        
+        url_numero = self.url_numero + '/%02d' % number        
         log.info(u"Descargando numero [%s] '%s'" % (str(number), str(url_numero)))
         
         # creamos directorio dentro de store
@@ -58,6 +60,12 @@ class Sync(BaseAction):
         
         # leemos page
         r = self.s.get(url_numero)
+        if r.status_code != requests.codes.ok:
+            # número libre
+            url_numero = self.url_numero_libre + '/%02d' % number
+            log.info(u"Descargando numero [%s] '%s'" % (str(number), str(url_numero)))
+            r = self.s.get(url_numero)             
+            
         r.raise_for_status()
         
         for index, (title, pdfhref, pdfname, pdfsize, descripcion) in enumerate(self._iter_seccion(r.content)):
