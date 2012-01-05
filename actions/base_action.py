@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-class Action(object):
+class BaseAction(object):
     def __init__(self, config):
         self.config = config
         

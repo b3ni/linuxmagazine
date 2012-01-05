@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+
 import plac
-import actions
+from actions import sync, search
 import config
 
 @plac.annotations(
@@ -8,9 +9,9 @@ import config
 )
 def main(action):
     if action == 'sync':
-        a = actions.sync.Sync(config)
+        a = sync.Sync(config)
     else:
-        a = actions.search.Search(config)
+        a = search.Search(config)
         
     a.do()
 

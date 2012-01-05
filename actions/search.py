@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from action import Action
+from base_action import BaseAction
 
-class Search(Action):
+class Search(BaseAction):
     pass
