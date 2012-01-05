@@ -38,3 +38,5 @@ Indica en directorio guardar los archivos descargados
 Usuario y password para la suscripción digital
 
 ## License
+
+MIT
